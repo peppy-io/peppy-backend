@@ -5,6 +5,7 @@ require 'bcrypt'
 require 'dotenv'
 require 'json'
 require 'jwt'
+require 'multi_json'
 require 'sequel'
 require 'sinatra'
 
@@ -26,6 +27,27 @@ DB.create_table?(:energy) do
 end
 
 set :port, 4000
+
+helpers do
+  # gets <token> from:
+  #   {"Authorization": <token>}
+  def authorized?
+    # token = request.env['access_token']
+    token = request.env['HTTP_AUTHORIZATION']
+    token.nil? ? false : true
+  end
+
+  def extract_user_id
+    token = request.env['HTTP_AUTHORIZATION']
+    begin
+      payload = JWT.decode token, nil, false
+      payload[0]['user_id']
+    rescue Error
+      # handle error
+      halt 400
+    end
+  end
+end
 
 get '/' do
   'Hello There!'
@@ -54,9 +76,30 @@ post '/login' do
   response
 end
 
-get '/validate' do
-  data = params['jwt']
-  puts data
-  puts JWT.decode data, nil, false
+post '/log' do
+  unless authorized?
+    halt 403, 'Unauthorized'
+  end
+  user_id = extract_user_id
+  data = JSON.parse(request.body.read)
+  energy_level = data['energy_level']
+  timestamp = DateTime.parse(data['timestamp'])
+  energy = DB[:energy]
+  energy.insert(user_id: user_id, energy_level: energy_level, timestamp: timestamp)
   200
+end
+
+get '/getEnergyLevels/day' do
+  unless authorized?
+    halt 403, 'Unauthorized'
+  end
+  user_id = extract_user_id
+  date = DateTime.now
+  upper_limit = DateTime.new(date.year, date.month, date.day)
+  upper_limit = upper_limit.new_offset('+5:30')
+  lower_limit = DateTime.new(date.year, date.month, date.day + 1)
+  lower_limit = lower_limit.new_offset('+5:30')
+  DB[:energy].where(user_id: user_id)
+    .where { (timestamp < Time.new(upper_limit.to_s)) && (timestamp >= Time.new(lower_limit.to_s)) }
+    .map { |e| e.to_json }
 end
