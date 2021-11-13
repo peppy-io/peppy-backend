@@ -24,9 +24,14 @@ DB.create_table?(:energy) do
   foreign_key :user_id, :users
   Float :energy_level
   DateTime :timestamp
+  String :event
 end
 
 set :port, 4000
+
+before do
+  headers['Access-Control-Allow-Origin'] = '*'
+end
 
 helpers do
   # gets <token> from:
@@ -83,23 +88,58 @@ post '/log' do
   user_id = extract_user_id
   data = JSON.parse(request.body.read)
   energy_level = data['energy_level']
+  event = data['event']
   timestamp = DateTime.parse(data['timestamp'])
   energy = DB[:energy]
-  energy.insert(user_id: user_id, energy_level: energy_level, timestamp: timestamp)
+  energy.insert(user_id: user_id, energy_level: energy_level, timestamp: timestamp, event: event)
   200
 end
 
-get '/getEnergyLevels/day' do
+get '/energyLevels/day' do
   unless authorized?
     halt 403, 'Unauthorized'
   end
   user_id = extract_user_id
   date = DateTime.now
   upper_limit = DateTime.new(date.year, date.month, date.day)
-  upper_limit = upper_limit.new_offset('+5:30')
+  upper_limit = upper_limit.new_offset(date.zone.to_str)
   lower_limit = DateTime.new(date.year, date.month, date.day + 1)
-  lower_limit = lower_limit.new_offset('+5:30')
-  DB[:energy].where(user_id: user_id)
+  lower_limit = lower_limit.new_offset(date.zone.to_str)
+  DB[:energy]
+    .where(user_id: user_id)
     .where { (timestamp < Time.new(upper_limit.to_s)) && (timestamp >= Time.new(lower_limit.to_s)) }
+    .map { |e| e.to_json }
+end
+
+get '/energyLevels/month' do
+  unless authorized?
+    halt 403, 'Unauthorized'
+  end
+  user_id = extract_user_id
+  date = DateTime.now
+  upper_limit = DateTime.new(date.year, date.month)
+  upper_limit = upper_limit.new_offset(date.zone.to_str)
+  lower_limit = DateTime.new(date.year, date.month + 1)
+  lower_limit = lower_limit.new_offset(date.zone.to_str)
+  DB[:energy]
+    .where(user_id: user_id)
+    .where { (timestamp < Time.new(upper_limit.to_s)) && (timestamp >= Time.new(lower_limit.to_s)) }
+    .map { |e| e.to_json }
+end
+
+get '/energyLevels' do
+  unless authorized?
+    halt 403, 'Unauthorized'
+  end
+  user_id = extract_user_id
+  date = DateTime.now
+  upper_limit = DateTime.new(date.year)
+  upper_limit = upper_limit.new_offset(date.zone.to_str)
+  lower_limit = DateTime.new(date.year + 1)
+  lower_limit = lower_limit.new_offset(date.zone.to_str)
+  puts Time.new(upper_limit.to_s)
+  puts Time.new(lower_limit.to_s)
+  DB[:energy]
+    .where(user_id: user_id)
     .map { |e| e.to_json }
 end
