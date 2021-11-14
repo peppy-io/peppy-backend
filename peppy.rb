@@ -8,11 +8,13 @@ require 'jwt'
 require 'multi_json'
 require 'sequel'
 require 'sinatra'
-require "sinatra/cors"
+require 'sinatra/cors'
 
 Dotenv.load
 
-DB = ENV.has_key?('DATABASE_URL') ? Sequel.connect(ENV['DATABASE_URL'], sslmode: 'require') : Sequel.postgres(host: ENV['host'], user: ENV['user'], password: ENV['password'], database: ENV['database'])
+DB = ENV.key?('DATABASE_URL') ?
+       Sequel.connect(ENV['DATABASE_URL'], sslmode: 'require') :
+       Sequel.postgres(host: ENV['host'], user: ENV['user'], password: ENV['password'], database: ENV['database'])
 
 DB.create_table?(:users) do
   primary_key :id
@@ -28,10 +30,10 @@ DB.create_table?(:energy) do
   String :event
 end
 
-set :allow_origin, "*"
-set :allow_methods, "GET,POST"
-set :allow_headers, "content-type,if-modified-since,authorization"
-set :expose_headers, "location,link"
+set :allow_origin, '*'
+set :allow_methods, 'GET,POST'
+set :allow_headers, 'content-type,if-modified-since,authorization'
+set :expose_headers, 'location,link'
 set :allow_credentials, true
 
 helpers do
@@ -102,9 +104,9 @@ get '/energyLevels/day' do
   end
   user_id = extract_user_id
   date = DateTime.now
-  upper_limit = DateTime.new(date.year, date.month, date.day)
+  upper_limit = DateTime.new(date.year, date.month, date.day + 1)
   upper_limit = upper_limit.new_offset(date.zone.to_str)
-  lower_limit = DateTime.new(date.year, date.month, date.day + 1)
+  lower_limit = DateTime.new(date.year, date.month, date.day)
   lower_limit = lower_limit.new_offset(date.zone.to_str)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
@@ -121,9 +123,9 @@ get '/energyLevels/month' do
   end
   user_id = extract_user_id
   date = DateTime.now
-  upper_limit = DateTime.new(date.year, date.month)
+  upper_limit = DateTime.new(date.year, date.month + 1)
   upper_limit = upper_limit.new_offset(date.zone.to_str)
-  lower_limit = DateTime.new(date.year, date.month + 1)
+  lower_limit = DateTime.new(date.year, date.month)
   lower_limit = lower_limit.new_offset(date.zone.to_str)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
@@ -140,9 +142,9 @@ get '/energyLevels' do
   end
   user_id = extract_user_id
   date = DateTime.now
-  upper_limit = DateTime.new(date.year)
+  upper_limit = DateTime.new(date.year + 1)
   upper_limit = upper_limit.new_offset(date.zone.to_str)
-  lower_limit = DateTime.new(date.year + 1)
+  lower_limit = DateTime.new(date.year)
   lower_limit = lower_limit.new_offset(date.zone.to_str)
   puts Time.new(upper_limit.to_s)
   puts Time.new(lower_limit.to_s)
@@ -152,4 +154,8 @@ get '/energyLevels' do
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   puts resp
   MultiJson.dump(resp)
+end
+
+error Error do
+  'Uh-oh there was an error'
 end
