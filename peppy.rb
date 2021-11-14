@@ -12,7 +12,7 @@ require "sinatra/cors"
 
 Dotenv.load
 
-DB = ENV.has_key?('DATABASE_URL') ? Sequel.postgres(ENV['DATABASE_URL']) : Sequel.postgres(host: ENV['host'], user: ENV['user'], password: ENV['password'], database: ENV['database'])
+DB = ENV.has_key?('DATABASE_URL') ? Sequel.connect(ENV['DATABASE_URL'], sslmode: 'require') : Sequel.postgres(host: ENV['host'], user: ENV['user'], password: ENV['password'], database: ENV['database'])
 
 DB.create_table?(:users) do
   primary_key :id
