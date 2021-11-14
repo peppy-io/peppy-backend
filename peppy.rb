@@ -155,7 +155,3 @@ get '/energyLevels' do
   puts resp
   MultiJson.dump(resp)
 end
-
-error Error do
-  'Uh-oh there was an error'
-end
