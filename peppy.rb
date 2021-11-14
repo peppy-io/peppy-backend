@@ -121,7 +121,7 @@ get '/energyLevels/month' do
   end
   user_id = extract_user_id
   date = DateTime.now
-  upper_limit = DateTime.new(date.year, date.month, date.day)
+  upper_limit = DateTime.new(date.year, date.month, date.day + 1)
   lower_limit = DateTime.new(date.year, date.month - 1, date.day)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
