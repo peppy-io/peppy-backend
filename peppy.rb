@@ -30,7 +30,7 @@ end
 
 set :allow_origin, "*"
 set :allow_methods, "GET,POST"
-set :allow_headers, "content-type,if-modified-since"
+set :allow_headers, "content-type,if-modified-since,authorization"
 set :expose_headers, "location,link"
 set :allow_credentials, true
 
