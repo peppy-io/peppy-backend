@@ -7,5 +7,4 @@ tmp/
 .bundle
 .env
 vendor
-Gemfile.lock
 coverage
