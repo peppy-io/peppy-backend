@@ -125,7 +125,8 @@ get '/energyLevels/month' do
   lower_limit = DateTime.new(date.year, date.month - 1, date.day)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
-    .where { (timestamp < upper_limit) and (timestamp >= lower_limit) }
+    .where { timestamp <= upper_limit }
+    .where { timestamp >= lower_limit }
     .collect { |e| e })
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   puts resp
