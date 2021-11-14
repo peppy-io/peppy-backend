@@ -9,5 +9,6 @@ gem 'multi_json'
 gem 'pg'
 gem 'sequel'
 gem 'sinatra'
+gem 'sinatra-cors', '~> 1.2'
 gem 'solargraph', group: :development
 gem 'thin'

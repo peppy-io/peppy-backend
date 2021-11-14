@@ -8,6 +8,7 @@ require 'jwt'
 require 'multi_json'
 require 'sequel'
 require 'sinatra'
+require "sinatra/cors"
 
 Dotenv.load
 
@@ -29,9 +30,11 @@ end
 
 set :port, 4000
 
-before do
-  headers['Access-Control-Allow-Origin'] = '*'
-end
+set :allow_origin, "*"
+set :allow_methods, "GET,POST"
+set :allow_headers, "content-type,if-modified-since"
+set :expose_headers, "location,link"
+set :allow_credentials, true
 
 helpers do
   # gets <token> from:
