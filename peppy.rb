@@ -110,7 +110,7 @@ get '/energyLevels/day' do
   lower_limit = lower_limit.new_offset(date.zone.to_str)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
-    .where { (timestamp < Time.new(upper_limit.to_s)) && (timestamp >= Time.new(lower_limit.to_s)) }
+    .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
     .collect { |e| e })
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   puts resp
@@ -129,7 +129,7 @@ get '/energyLevels/month' do
   lower_limit = lower_limit.new_offset(date.zone.to_str)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
-    .where { (timestamp < Time.new(upper_limit.to_s)) && (timestamp >= Time.new(lower_limit.to_s)) }
+    .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
     .collect { |e| e })
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   puts resp
