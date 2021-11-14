@@ -28,8 +28,6 @@ DB.create_table?(:energy) do
   String :event
 end
 
-set :port, 4000
-
 set :allow_origin, "*"
 set :allow_methods, "GET,POST"
 set :allow_headers, "content-type,if-modified-since"

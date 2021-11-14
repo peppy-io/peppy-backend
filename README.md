@@ -11,5 +11,5 @@ rvm
 
 ``` sh
 bundle install
-bundle exec ruby peppy.rb
+bundle exec puma
 ```
