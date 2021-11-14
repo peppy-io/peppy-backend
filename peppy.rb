@@ -108,6 +108,10 @@ get '/energyLevels/day' do
   upper_limit = upper_limit.new_offset(date.zone.to_str)
   lower_limit = DateTime.new(date.year, date.month, date.day)
   lower_limit = lower_limit.new_offset(date.zone.to_str)
+  puts DB[:energy]
+    .where(user_id: user_id)
+    .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
+    .sql
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
     .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
@@ -127,6 +131,10 @@ get '/energyLevels/month' do
   upper_limit = upper_limit.new_offset(date.zone.to_str)
   lower_limit = DateTime.new(date.year, date.month)
   lower_limit = lower_limit.new_offset(date.zone.to_str)
+  puts DB[:energy]
+    .where(user_id: user_id)
+    .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
+    .sql
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
     .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
