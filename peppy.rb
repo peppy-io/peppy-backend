@@ -105,13 +105,11 @@ get '/energyLevels/day' do
   user_id = extract_user_id
   date = DateTime.now
   upper_limit = DateTime.new(date.year, date.month, date.day + 1)
-  upper_limit = upper_limit.new_offset(date.zone.to_str)
   lower_limit = DateTime.new(date.year, date.month, date.day)
-  lower_limit = lower_limit.new_offset(date.zone.to_str)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
-    .where { timestamp < Time.new(upper_limit.to_s) }
-    .where { timestamp >= Time.new(lower_limit.to_s) }
+    .where { timestamp < upper_limit }
+    .where { timestamp >= lower_limit }
     .collect { |e| e })
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   MultiJson.dump(resp)
@@ -123,13 +121,11 @@ get '/energyLevels/month' do
   end
   user_id = extract_user_id
   date = DateTime.now
-  upper_limit = DateTime.new(date.year, date.month + 1)
-  upper_limit = upper_limit.new_offset(date.zone.to_str)
-  lower_limit = DateTime.new(date.year, date.month)
-  lower_limit = lower_limit.new_offset(date.zone.to_str)
+  upper_limit = DateTime.new(date.year, date.month, date.day)
+  lower_limit = DateTime.new(date.year, date.month - 1, date.day)
   response = MultiJson.dump(DB[:energy]
     .where(user_id: user_id)
-    .where { (timestamp < Time.new(upper_limit.to_s)) and (timestamp >= Time.new(lower_limit.to_s)) }
+    .where { (timestamp < upper_limit) and (timestamp >= lower_limit) }
     .collect { |e| e })
   resp = JSON[response].sort_by { |record| DateTime.parse(record['timestamp']) }
   puts resp
